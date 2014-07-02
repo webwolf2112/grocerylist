@@ -7,7 +7,7 @@ include('includes/header.php');
 	 
 <section class="indexPage">
 
-	    <div class="main"></div>
+	    <div class="main">&nbsp;</div>
   	<div class="container mainPage">
 
   	
