@@ -1,0 +1,9 @@
+[20-May-2014 12:00:11 UTC] PHP Fatal error:  Using $this when not in object context in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 11
+[20-May-2014 12:02:11 UTC] PHP Fatal error:  Using $this when not in object context in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 11
+[20-May-2014 12:02:14 UTC] PHP Fatal error:  Using $this when not in object context in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 11
+[20-May-2014 12:02:18 UTC] PHP Fatal error:  Using $this when not in object context in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 11
+[04-Jun-2014 00:40:36 UTC] PHP Fatal error:  Class 'mysqli_connect' not found in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 3
+[04-Jun-2014 00:41:02 UTC] PHP Fatal error:  Class 'mysqli_connect' not found in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 3
+[04-Jun-2014 00:41:06 UTC] PHP Fatal error:  Class 'mysqli_connect' not found in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 3
+[04-Jun-2014 00:42:39 UTC] PHP Fatal error:  Class 'mysqli_connect' not found in /home/wolfyshield2112/public_html/programs/grocery-list.php on line 3
+[18-Jun-2014 00:28:27 UTC] PHP Fatal error:  Call to undefined function mysqli_charset() in /home/wolfyshield2112/public_html/programs/recipeForm.php on line 14
