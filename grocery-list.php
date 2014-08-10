@@ -1,4 +1,6 @@
-<?php include('db-connect.php') ?>
+<?php
+ include('db-connect.php');
+ ?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,12 +11,19 @@
   </head>
   <body >
 
-<? $recipeQuery = "SELECT name_of_recipe, recipe_id FROM Recipes;"; ?>
+<?  ?>
 
-<form action="shopping-list-form.php" method="post">
+<form action="" method="post">
 
 			<h1>Grocery List  pulling from database</h1>
-			<p><? if($result = mysqli_query($con, $recipeQuery)) { 
+			
+			
+			<p><?
+				// Select name of recipe and ID to populate the checkboxes 
+	
+				$recipeQuery = "SELECT name_of_recipe, recipe_id FROM Recipes;";
+			
+			 if($result = mysqli_query($con, $recipeQuery)) { 
 			while($row = mysqli_fetch_assoc($result)) {?>
 			<input type="checkbox" name="recipe_id[]" value="<?=$row['recipe_id']?>"><?=$row['name_of_recipe']?> recipe id: <?=$row['recipe_id']?></input>
 			
@@ -23,66 +32,128 @@
 		<input type="submit" name="submit" value="submit"/></p>
 		</form>
 		
-		
-				
-		
-		
-		
 
 <p><i> *on submit will populate a grocery check box list</i></p>
 
 	
-	
-	
-	
-	
-	
-	
-
 <div class ="meals">
-	<h2>Ingredients from Meal</h2>
-	<p><? $ingredQuery = "SELECT Ingredients.name, Ingredients.quanity, quanity.unit FROM Ingredients, quanity
-WHERE Ingredients.quanity_id = quanity.quanity_id;";
-		if($result = mysqli_query($con, $ingredQuery)) { 
-			while($row = mysqli_fetch_assoc($result)) {
 				
-				
-			?>
-				
-				<p> <?=$row['name']?> <?=$row['quanity']?> <?=$row['unit']?>
-		<? }
-		} ?></p>
 			
 		
-		<h1>Start New section</h1>
+			
+			<?  // Pulling the IDs from the posted checkbox form and making a new query to populate the grocery list 
+			
+			$recipeId = implode(',',$_POST['recipe_id']);  //create an array from the $_post variables to insert into the $ingredientList querie
+
+			$ingredientList = "SELECT Recipes.recipe_id, Recipes.name_of_recipe, Ingredients.name, Ingredients.quanity
+			FROM Recipes, Ingredients, quanity
+			WHERE Recipes.recipe_id = Ingredients.recipe_id
+			AND Recipes.recipe_id
+			IN ($recipeId);";
+
+			?>
+
+ 
+<!-- getting the name variables from ingredients to form an array to loop through to be able to add them in the grocery list -->
+
+		<? //getting the names for the switch loop later ?? possible way to accomplish this task
+			$ingredientNames = "SELECT DISTINCT name FROM Ingredients;";
 		
-			<p><? $recipeTest = "SELECT Recipes.name_of_recipe, Ingredients.name FROM Recipes INNER JOIN Ingredients WHERE recipe_id =2;";
-		if($result = mysqli_query($con, $recipeTest)) { 
-			while($row = mysqli_fetch_assoc($result)) {?>
-				<p>Recipe Name: <?=$row['name_of_recipe']?><br/> Ingredient Name: <?=$row['name']?> <hr>
-		<? }
-		}?></p>
+		if($result= mysqli_query($con, $ingredientNames)){
+				$nameArray = array();
+				$count=0;
+				while($name = mysqli_fetch_assoc($result)){
+				
+						$nameArray[$count] = $name['name'];
+						$count += 1;
+
+		 }} ?>
+
+ 
+<!--pulling from Ingredient and Recipe tables-->
+
+		<? if(isset($_POST['recipe_id'])) { ?>
 		
-		
-		
+		<div class="meal-list">
+			<h2>Here is your list</h2>
 		
 		
 
 
-<div class="meal-list">
-
-	<h2>Here is your list</h2>
-		<input type="checkbox" name="meal" value="eggs">4 eggs</input>
-	<input type="checkbox"	name="meal" value="milk">2 cups milk</input>
-	<input type="checkbox"  name="meal" value="cheese">1 cup cheese</input>
 	
-	<button>Print Checked</button>
+		
+
+	
+	
 
 </div>
+															
+			<!--looping through the ingredients -->
+										
+			<p><? if($result= mysqli_query($con, $ingredientList)){
+			
+				$firstArray = [];
+				
+				while($row = mysqli_fetch_assoc($result)){
+				
+								
+		//looping through and adding up the values 
+		
+					foreach($nameArray as $name){
+    			if($name == $row['name']){
+    				${"quanity_{$name}"} += $row['quanity'];
+    				 
+   				 } // END if($name == $row['name'])
+				} // END foreach($nameArray as $name){ 
+				
+				
+				// Set New array to create new list
+				
+				array_push($firstArray, $row['name']);
+				
+						
+			
+		 } // END while($row = mysqli_fetch_assoc($result))
+		}// END if($result= mysqli_query($con, $ingredientList)) ?>
+		
+		
+		<!-- second loop through -->
+		
+			<? 
+				$results = array_unique($firstArray);
+				
+			foreach($results as $ingName ){ ?>		
+				
+		<input type="checkbox" value="$ingName"><?=$ingName?>(<?=${"quanity_{$ingName}"}?>)</input><br/>
+		
+			<? } // END foreach($firstArray as $ingNames )?>
+		
+		
+		
+		
+					<button>Print Checked not hooked up</button>
+	
+
+	<h2>This Will Be Hidden Later</h2>
+	<p>This is the ingredient name array- will use to compare in future switch statement </p>
+		
+<?	foreach($nameArray as $name){
+    echo $name.'<br>';
+    } // END foreach($nameArray as $name){ 
+	
+?>
+		
+			
+	<? } // END if($_POST['recipe_id'])  {  ?>		
+			
+
+
 <hr>
+
+<!-- Hidden Until Ready to Add More Functionality 
 <div class ="new-meal">
 	<h1>This will come later</h1>
-	<h2>form</h2>
+	<h2>Functionality Not Plugged In</h2>
 		<form action="?" method="post">
 			<label for="recipe_name">Recipe Name</label>
 			<input name="recipe_name" type="text"></input>
@@ -110,6 +181,6 @@ WHERE Ingredients.quanity_id = quanity.quanity_id;";
 
 
 
-</div>
+</div> -->
 </body>
 </html>
