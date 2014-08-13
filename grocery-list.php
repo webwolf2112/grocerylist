@@ -11,7 +11,7 @@
   </head>
   <body >
 
-<?  ?>
+
 
 <form action="" method="post">
 
@@ -45,9 +45,9 @@
 			
 			$recipeId = implode(',',$_POST['recipe_id']);  //create an array from the $_post variables to insert into the $ingredientList querie
 
-			$ingredientList = "SELECT Recipes.recipe_id, Recipes.name_of_recipe, Ingredients.name, Ingredients.quanity
-			FROM Recipes, Ingredients, quanity
-			WHERE Recipes.recipe_id = Ingredients.recipe_id
+			$ingredientList = "SELECT Recipes.recipe_id, Recipes.name_of_recipe, Ingredients.name, Ingredients.quanity, quanity.unit 
+			FROM Recipes, Ingredients, quanity WHERE Recipes.recipe_id = Ingredients.recipe_id 
+			AND Ingredients.measurement = quanity.quanity_id 
 			AND Recipes.recipe_id
 			IN ($recipeId);";
 
@@ -56,8 +56,9 @@
  
 <!-- getting the name variables from ingredients to form an array to loop through to be able to add them in the grocery list -->
 
-		<? //getting the names for the switch loop later ?? possible way to accomplish this task
-			$ingredientNames = "SELECT DISTINCT name FROM Ingredients;";
+		<? //getting ingredient names in order to combine the ingredients into the list
+		
+		$ingredientNames = "SELECT DISTINCT name FROM Ingredients;";
 		
 		if($result= mysqli_query($con, $ingredientNames)){
 				$nameArray = array();
@@ -76,39 +77,36 @@
 		
 		<div class="meal-list">
 			<h2>Here is your list</h2>
-		
-		
-
-
-	
-		
-
-	
-	
-
-</div>
-															
+			
+							
 			<!--looping through the ingredients -->
 										
 			<p><? if($result= mysqli_query($con, $ingredientList)){
 			
-				$firstArray = [];
+				// new array start at 0 to prevent malicious code
+				$firstArray = [0];
+				
 				
 				while($row = mysqli_fetch_assoc($result)){
 				
-								
-		//looping through and adding up the values 
+					$unit = $row['unit'];				
+		//looping through and adding up the quanity values
 		
 					foreach($nameArray as $name){
     			if($name == $row['name']){
     				${"quanity_{$name}"} += $row['quanity'];
-    				 
+    				${"unit_{$name}"} = $row['unit'];
+    				
+    				    				 
    				 } // END if($name == $row['name'])
 				} // END foreach($nameArray as $name){ 
 				
 				
-				// Set New array to create new list
 				
+				// unset the first element of the array
+				unset($firstArray[0]);
+				
+				// Set New array to create new list
 				array_push($firstArray, $row['name']);
 				
 						
@@ -121,10 +119,97 @@
 		
 			<? 
 				$results = array_unique($firstArray);
+		
 				
-			foreach($results as $ingName ){ ?>		
+			foreach($results as $ingName ){ 
+			
+			// assigning a new value for the units  *** research a better way to do this- lots of repeating code ***
+			
+    				
+    				switch($ingName){
+    				
+    					case ${"unit_{$ingName}"} =='unit':
+    						${"unit_{$ingName}"} = " ";
+     					break;
+     					
+     					case ${"unit_{$ingName}"} =="cup":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;
+     					
+     					case ${"unit_{$ingName}"} =="tablespoon":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;   
+     					
+     					case ${"unit_{$ingName}"} =="teaspoon":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break; 
+     					
+     					case ${"unit_{$ingName}"} =="package":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;	
+     					
+     					case ${"unit_{$ingName}"} =="can":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;	
+     					
+     					case ${"unit_{$ingName}"} =="bag":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;	
+     					
+     					case ${"unit_{$ingName}"} =="box":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;	
+     					
+     					case ${"unit_{$ingName}"} =="gallon":
+     						if(${"quanity_{$ingName}"} >1){
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+    						else{
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    						}
+     					break;
+    					
+    				 	default:
+    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+    					break;
+    					
+    				} //END switch ($row['unit'])
+    				
+    			
+
+			
+			
+			
+			?>		
 				
-		<input type="checkbox" value="$ingName"><?=$ingName?>(<?=${"quanity_{$ingName}"}?>)</input><br/>
+		<input type="checkbox" value="<?=$ingName?>"><?=$ingName?>, <?=${"quanity_{$ingName}"}?> <?=${"unit_{$ingName}"}?> </input><br/>
 		
 			<? } // END foreach($firstArray as $ingNames )?>
 		
@@ -147,7 +232,7 @@
 	<? } // END if($_POST['recipe_id'])  {  ?>		
 			
 
-
+</div>
 <hr>
 
 <!-- Hidden Until Ready to Add More Functionality 
