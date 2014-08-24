@@ -11,23 +11,25 @@
   </head>
   <body >
 
+	<!-- posting form to same page pulling in variables to populate the grocery list -->
 
-
-<form action="" method="post">
+		<form method="post">
 
 			<h1>Grocery List  pulling from database</h1>
-			
-			
 			<p><?
 				// Select name of recipe and ID to populate the checkboxes 
 	
-				$recipeQuery = "SELECT name_of_recipe, recipe_id FROM Recipes;";
+			$recipeQuery = "SELECT name_of_recipe, recipe_id FROM Recipes;";
 			
 			 if($result = mysqli_query($con, $recipeQuery)) { 
 			while($row = mysqli_fetch_assoc($result)) {?>
 			<input type="checkbox" name="recipe_id[]" value="<?=$row['recipe_id']?>"><?=$row['name_of_recipe']?> recipe id: <?=$row['recipe_id']?></input>
 			
-		<? }} ?>
+			<? 
+			} //END while($row = mysqli_fetch_assoc($result))
+			} //END while($row = mysqli_fetch_assoc($result))
+			?>
+			
 		<br/>
 		<input type="submit" name="submit" value="submit"/></p>
 		</form>
@@ -41,7 +43,13 @@
 			
 		
 			
-			<?  // Pulling the IDs from the posted checkbox form and making a new query to populate the grocery list 
+			<?
+			
+							
+			
+				
+			
+		 // Pulling the IDs from the posted checkbox form and making a new query to populate the grocery list 
 			
 			$recipeId = implode(',',$_POST['recipe_id']);  //create an array from the $_post variables to insert into the $ingredientList querie
 
@@ -51,16 +59,12 @@
 			AND Recipes.recipe_id
 			IN ($recipeId);";
 
-			?>
-
- 
-<!-- getting the name variables from ingredients to form an array to loop through to be able to add them in the grocery list -->
-
-		<? //getting ingredient names in order to combine the ingredients into the list
 		
-		$ingredientNames = "SELECT DISTINCT name FROM Ingredients;";
+		// creating an array of the ingredient names in order to populate grocery list with total amount (ex eggs 6, vs eggs written 6 times in list)
 		
-		if($result= mysqli_query($con, $ingredientNames)){
+			$ingredientNames = "SELECT DISTINCT name FROM Ingredients;";
+		
+			if($result= mysqli_query($con, $ingredientNames)){
 				$nameArray = array();
 				$count=0;
 				while($name = mysqli_fetch_assoc($result)){
@@ -68,48 +72,49 @@
 						$nameArray[$count] = $name['name'];
 						$count += 1;
 
-		 }} ?>
+		 	}//END while($name = mysqli_fetch_assoc($result))
+		 	}//END if($result= mysqli_query($con, $ingredientNames))
+		 
+		 ?>
 
  
-<!--pulling from Ingredient and Recipe tables-->
+<!--Populating list from the Post variables via form submission-->
 
 		<? if(isset($_POST['recipe_id'])) { ?>
 		
-		<div class="meal-list">
-			<h2>Here is your list</h2>
+			<div class="meal-list">
+				<h2>Here is your list: </h2>
 			
 							
 			<!--looping through the ingredients -->
 										
 			<p><? if($result= mysqli_query($con, $ingredientList)){
 			
-				// new array start at 0 to prevent malicious code
+				// new array start at 0 to prevent malicious code (removed later)
 				$firstArray = [0];
 				
 				
 				while($row = mysqli_fetch_assoc($result)){
 				
-					$unit = $row['unit'];				
-		//looping through and adding up the quanity values
+					$unit = $row['unit'];	
+								
+		//looping through and adding up the quanity values  *using the ingredient name array created above to test against to get quanity*
 		
-					foreach($nameArray as $name){
-    			if($name == $row['name']){
-    				${"quanity_{$name}"} += $row['quanity'];
-    				${"unit_{$name}"} = $row['unit'];
+				foreach($nameArray as $name){
+    				if($name == $row['name']){
     				
+	    				${"quanity_{$name}"} += $row['quanity'];
+	    				${"unit_{$name}"} = $row['unit'];
     				    				 
    				 } // END if($name == $row['name'])
 				} // END foreach($nameArray as $name){ 
 				
-				
-				
-				// unset the first element of the array
+				// unset the first element of the array (removed the 0 added to prevent malicious code 
 				unset($firstArray[0]);
 				
 				// Set New array to create new list
 				array_push($firstArray, $row['name']);
-				
-						
+								
 			
 		 } // END while($row = mysqli_fetch_assoc($result))
 		}// END if($result= mysqli_query($con, $ingredientList)) ?>
@@ -117,91 +122,42 @@
 		
 		<!-- second loop through -->
 		
-			<? 
-				$results = array_unique($firstArray);
-		
+			<?  $results = array_unique($firstArray); ?>
 				
-			foreach($results as $ingName ){ 
-			
-			// assigning a new value for the units  *** research a better way to do this- lots of repeating code ***
-			
-    				
-    				switch($ingName){
-    				
-    					case ${"unit_{$ingName}"} =='unit':
-    						${"unit_{$ingName}"} = " ";
-     					break;
-     					
-     					case ${"unit_{$ingName}"} =="cup":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;
-     					
-     					case ${"unit_{$ingName}"} =="tablespoon":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;   
-     					
-     					case ${"unit_{$ingName}"} =="teaspoon":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break; 
-     					
-     					case ${"unit_{$ingName}"} =="package":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;	
-     					
-     					case ${"unit_{$ingName}"} =="can":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;	
-     					
-     					case ${"unit_{$ingName}"} =="bag":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;	
-     					
-     					case ${"unit_{$ingName}"} =="box":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;	
-     					
-     					case ${"unit_{$ingName}"} =="gallon":
-     						if(${"quanity_{$ingName}"} >1){
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
-    						else{
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    						}
-     					break;
-    					
-    				 	default:
-    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
-    					break;
-    					
-    				} //END switch ($row['unit'])
-    				
+				<p>Beginning of form</p><form>
+				
+				<?
+					foreach($results as $ingName ){ 
+					
+					// assigning a new value for the units  
+					
+		    				switch($ingName){
+		    				
+		    					case ${"unit_{$ingName}"} =='unit':
+		    						${"unit_{$ingName}"} = " ";
+		     					break;
+		     					
+		     					case ${"unit_{$ingName}"} =="cup":		     					
+		     					case ${"unit_{$ingName}"} =="tablespoon":
+  		     					case ${"unit_{$ingName}"} =="teaspoon":
+		     					case ${"unit_{$ingName}"} =="package":
+		     					case ${"unit_{$ingName}"} =="can":
+		     					case ${"unit_{$ingName}"} =="bag":
+		     					case ${"unit_{$ingName}"} =="box":
+		     					case ${"unit_{$ingName}"} =="gallon":
+		     						if(${"quanity_{$ingName}"} >1){
+		    						${"unit_{$ingName}"} = ${"unit_{$ingName}"}."s";}
+		    						else{
+		    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+		    						}
+		     					break;
+		    					
+		    				 	default:
+		    						${"unit_{$ingName}"} = ${"unit_{$ingName}"};
+		    					break;
+		    					
+		    				} //END switch ($row['unit'])
+		    				
     			
 
 			
@@ -214,19 +170,10 @@
 			<? } // END foreach($firstArray as $ingNames )?>
 		
 		
-		
-		
+					
+					
 					<button>Print Checked not hooked up</button>
-	
-
-	<h2>This Will Be Hidden Later</h2>
-	<p>This is the ingredient name array- will use to compare in future switch statement </p>
-		
-<?	foreach($nameArray as $name){
-    echo $name.'<br>';
-    } // END foreach($nameArray as $name){ 
-	
-?>
+					</form> end form;
 		
 			
 	<? } // END if($_POST['recipe_id'])  {  ?>		
